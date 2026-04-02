@@ -13,10 +13,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve favicon (PNG) for browsers requesting .ico or .png
-app.get(['/favicon.ico', '/favicon.png'], (req, res) => {
+// Serve PNG favicon directly under /images path with correct MIME type
+app.get('/images/favicon.png', (req, res) => {
   const filePath = path.join(__dirname, 'public', 'images', 'favicon.png');
-  res.set('Cache-Control', 'public, max-age=86400'); // cache 1 day
+  res.type('png'); // set Content-Type
   res.sendFile(filePath);
 });
 
