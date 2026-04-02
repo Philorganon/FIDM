@@ -13,9 +13,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Protect webhook.txt from direct web access
-app.get('/webhook.txt', (req, res) => {
-  res.status(405).send('Method Not Allowed');
+// Serve favicon (PNG) for browsers requesting .ico or .png
+app.get(['/favicon.ico', '/favicon.png'], (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'images', 'favicon.png');
+  res.set('Cache-Control', 'public, max-age=86400'); // cache 1 day
+  res.sendFile(filePath);
 });
 
 app.head('/webhook.txt', (req, res) => {
