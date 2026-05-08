@@ -1,1 +1,1 @@
-https://discord.com/api/webhooks/1488656416234274939/o7SgPAJ2pECJaB2aEdqQ9aEps6O8Uy5_TENb-JgibEiNpi8YtMuX2IQOfLt6_iOaT82i
+https://postitweb.vercel.app/hook/fidm/7173188fde9530b7
